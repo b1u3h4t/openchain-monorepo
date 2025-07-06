@@ -8,4 +8,8 @@ release("//cmd/signature-database-srv")
 
 release("//cmd/vyper-compiler-srv")
 
+release("//cmd/solidity-compiler-srv")
+
+release("//cmd/tx-tracer-srv")
+
 release("//cmd/signature-scraper-srv")

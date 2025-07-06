@@ -916,7 +916,6 @@ def go_repositories():
     go_repository(
         name = "com_github_ethereum_go_ethereum",
         importpath = "github.com/ethereum/go-ethereum",
-        patches = ["@openchainxyz-monorepo//:go-ethereum.patch"],
         sum = "h1:i/7d9RBBwiXCEuyduBQzJw/mKmnvzsN14jqBmytw72s=",
         version = "v1.10.26",
     )
