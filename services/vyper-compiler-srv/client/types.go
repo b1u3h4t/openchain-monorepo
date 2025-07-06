@@ -14,7 +14,9 @@ const (
 )
 
 type CompileResponse struct {
-	Status  Status `json:"status"`
-	Message string `json:"message,omitempty"`
-	ABI     []any  `json:"abi"`
+	Status          Status `json:"status"`
+	Message         string `json:"message,omitempty"`
+	ABI             []any  `json:"abi"`
+	Bytecode        string `json:"bytecode,omitempty"`
+	BytecodeRuntime string `json:"bytecode_runtime,omitempty"`
 }

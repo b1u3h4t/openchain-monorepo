@@ -3,12 +3,13 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/openchainxyz/openchainxyz-monorepo/internal/compiler"
 	"github.com/openchainxyz/openchainxyz-monorepo/services/vyper-compiler-srv/client"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func (s *Service) serveCompile(w http.ResponseWriter, r *http.Request) {
@@ -49,9 +50,25 @@ func (s *Service) serveCompile(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	// Type assertion for ABI
+	abi, ok := obj.Info.AbiDefinition.([]any)
+	if !ok {
+		// If AbiDefinition is not []any, try to convert it
+		if abiBytes, ok := obj.Info.AbiDefinition.([]byte); ok {
+			var abiData []any
+			if err := json.Unmarshal(abiBytes, &abiData); err == nil {
+				abi = abiData
+			}
+		}
+		// If still not ok, use empty slice
+		if !ok {
+			abi = []any{}
+		}
+	}
+
 	json.NewEncoder(w).Encode(&client.CompileResponse{
 		Status:          client.StatusSuccess,
-		ABI:             obj.Info.AbiDefinition,
+		ABI:             abi,
 		Bytecode:        obj.Code,
 		BytecodeRuntime: obj.RuntimeCode,
 	})

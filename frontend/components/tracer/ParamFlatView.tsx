@@ -3,7 +3,7 @@ import { TraceMetadata } from './types';
 import WithSeparator from 'react-with-separator';
 import { DataRenderer } from './DataRenderer';
 import * as React from 'react';
-import { Property } from 'csstype';
+import type { Property } from 'csstype';
 import Color = Property.Color;
 
 type ParamFlatViewProps = {

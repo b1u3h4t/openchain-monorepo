@@ -66,7 +66,7 @@ export const SupportedChains = [
         coingeckoId: 'coingecko:avalanche-2',
         defillamaPrefix: 'avax',
         rpcUrl: 'https://rpc.ankr.com/avalanche',
-        blockexplorerUrl: 'https://snowtrace.io',
+        blockexplorerUrl: 'https://snowscan.xyz',
     },
     {
         chainId: 42161,
