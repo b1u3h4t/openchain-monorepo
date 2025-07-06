@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .result {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            max-height: 400px;
+            overflow: auto;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .loading {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>API 测试页面</h1>
+    <p>测试前端是否能正确调用本地 tx-tracer-srv API</p>
+
+    <div>
+        <button id="traceBtn" class="button primary" onclick="testTraceAPI()">测试 Trace API</button>
+        <button id="storageBtn" class="button success" onclick="testStorageAPI()">测试 Storage API</button>
+    </div>
+
+    <div id="error" class="error" style="display: none;"></div>
+
+    <div id="traceResult" class="result" style="display: none;">
+        <h3>Trace API 结果:</h3>
+        <pre id="traceContent"></pre>
+    </div>
+
+    <div id="storageResult" class="result" style="display: none;">
+        <h3>Storage API 结果:</h3>
+        <pre id="storageContent"></pre>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8083';
+
+        async function doApiRequest(path) {
+            const response = await fetch(`${API_BASE}${path}`);
+            const json = await response.json();
+
+            if (!json.ok) {
+                throw new Error(json.error || 'Unknown error');
+            }
+
+            return json.result;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = `错误: ${message}`;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function setLoading(loading) {
+            const traceBtn = document.getElementById('traceBtn');
+            const storageBtn = document.getElementById('storageBtn');
+
+            if (loading) {
+                traceBtn.classList.add('loading');
+                storageBtn.classList.add('loading');
+                traceBtn.disabled = true;
+                storageBtn.disabled = true;
+            } else {
+                traceBtn.classList.remove('loading');
+                storageBtn.classList.remove('loading');
+                traceBtn.disabled = false;
+                storageBtn.disabled = false;
+            }
+        }
+
+        async function testTraceAPI() {
+            setLoading(true);
+            hideError();
+
+            try {
+                const result = await doApiRequest('/api/v1/trace/ethereum/0x1234567890123456789012345678901234567890123456789012345678901234');
+
+                document.getElementById('traceContent').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('traceResult').style.display = 'block';
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function testStorageAPI() {
+            setLoading(true);
+            hideError();
+
+            try {
+                const result = await doApiRequest('/api/v1/storage/ethereum/0x1234567890123456789012345678901234567890/0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd');
+
+                document.getElementById('storageContent').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('storageResult').style.display = 'block';
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+    </script>
+</body>
+
+</html>
