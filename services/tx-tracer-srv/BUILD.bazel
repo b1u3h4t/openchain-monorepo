@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "tx-tracer-srv",
+    srcs = ["service.go"],
+    importpath = "github.com/openchainxyz/openchainxyz-monorepo/services/tx-tracer-srv",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/ethclient",
+        "//services/tx-tracer-srv/client",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//eth/tracers",
+        "@com_github_gorilla_handlers//:handlers",
+        "@com_github_gorilla_mux//:mux",
+        "@com_github_sirupsen_logrus//:logrus",
+    ],
+) 
