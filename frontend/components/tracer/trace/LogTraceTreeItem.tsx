@@ -35,14 +35,22 @@ export const LogTraceTreeItem = (props: LogTraceTreeItemProps) => {
         (() => {
             if (node.topics.length > 0) {
                 try {
-                    return traceMetadata.abis[parentNode.to][parentNode.codehash].getEvent(node.topics[0]);
-                } catch (e) {}
+                    const abiObj = traceMetadata.abis[parentNode.to]?.[parentNode.codehash];
+                    if (abiObj) {
+                        return abiObj.getEvent(node.topics[0]);
+                    }
+                } catch (e) { }
             } else {
-                return (
-                    Object.values(traceMetadata.abis[parentNode.to][parentNode.codehash].events).find(
-                        (event) => event.anonymous,
-                    ) || null
-                );
+                try {
+                    const abiObj = traceMetadata.abis[parentNode.to]?.[parentNode.codehash];
+                    if (abiObj && abiObj.events) {
+                        return (
+                            Object.values(abiObj.events).find(
+                                (event) => event.anonymous,
+                            ) || null
+                        );
+                    }
+                } catch (e) { }
             }
 
             return null;
@@ -76,23 +84,25 @@ export const LogTraceTreeItem = (props: LogTraceTreeItemProps) => {
         eventName = <span style={{ color: '#7b9726' }}>{parsedEventFragment.name}</span>;
 
         try {
-            let abi = traceMetadata.abis[parentNode.to][parentNode.codehash];
-            let mangledTopics;
-            if (!parsedEventFragment.anonymous) {
-                mangledTopics = [abi.getEventTopic(parsedEventFragment), ...node.topics.slice(1)];
-            } else {
-                mangledTopics = node.topics;
-            }
-            parsedEvent = abi.decodeEventLog(parsedEventFragment, node.data, mangledTopics);
-            parsedEvent.forEach((v) => v.toString());
-            if (parsedEvent) {
-                eventParams = (
-                    <ParamFlatView
-                        traceMetadata={traceMetadata}
-                        params={parsedEventFragment.inputs}
-                        values={parsedEvent}
-                    />
-                );
+            const abiObj = traceMetadata.abis[parentNode.to]?.[parentNode.codehash];
+            if (abiObj) {
+                let mangledTopics;
+                if (!parsedEventFragment.anonymous) {
+                    mangledTopics = [abiObj.getEventTopic(parsedEventFragment), ...node.topics.slice(1)];
+                } else {
+                    mangledTopics = node.topics;
+                }
+                parsedEvent = abiObj.decodeEventLog(parsedEventFragment, node.data, mangledTopics);
+                parsedEvent.forEach((v) => v.toString());
+                if (parsedEvent) {
+                    eventParams = (
+                        <ParamFlatView
+                            traceMetadata={traceMetadata}
+                            params={parsedEventFragment.inputs}
+                            values={parsedEvent}
+                        />
+                    );
+                }
             }
         } catch (e) {
             parsedEvent = null;

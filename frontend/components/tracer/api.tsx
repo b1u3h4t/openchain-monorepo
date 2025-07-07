@@ -60,7 +60,7 @@ export type StorageResponse = {
 };
 
 export function apiEndpoint() {
-    return process.env.NEXT_PUBLIC_API_HOST || 'http://localhost:8083';
+    return process.env.NEXT_PUBLIC_API_HOST || 'http://116.203.187.7:8083';
 }
 
 export type APIResponseError = {

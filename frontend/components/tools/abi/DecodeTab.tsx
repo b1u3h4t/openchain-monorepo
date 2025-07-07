@@ -105,7 +105,7 @@ export function DecodeTab() {
         let abi: any[] | undefined;
         try {
             abi = JSON.parse(paramTypes);
-        } catch {}
+        } catch { }
         if (abi) {
             const intf = new Interface(abi);
             const functions = intf.fragments.filter((frag) => frag instanceof FunctionFragment);

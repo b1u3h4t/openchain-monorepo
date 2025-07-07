@@ -51,11 +51,14 @@ export const CallTraceTreeItem = (props: CallTraceTreeItemProps) => {
         (() => {
             if (node.input.length > 2) {
                 try {
-                    const frag = traceMetadata.abis[node.to][node.codehash].getFunction(
-                        node.input.substring(0, 10).toLowerCase(),
-                    );
-                    if (frag) return frag;
-                } catch (e) {}
+                    const abiObj = traceMetadata.abis[node.to]?.[node.codehash];
+                    if (abiObj) {
+                        const frag = abiObj.getFunction(
+                            node.input.substring(0, 10).toLowerCase(),
+                        );
+                        if (frag) return frag;
+                    }
+                } catch (e) { }
             }
 
             try {
@@ -72,10 +75,13 @@ export const CallTraceTreeItem = (props: CallTraceTreeItemProps) => {
         (() => {
             if (node.status === 0 && node.output.length > 2) {
                 try {
-                    return traceMetadata.abis[node.to][node.codehash].getError(
-                        node.output.substring(0, 10).toLowerCase(),
-                    );
-                } catch (e) {}
+                    const abiObj = traceMetadata.abis[node.to]?.[node.codehash];
+                    if (abiObj) {
+                        return abiObj.getError(
+                            node.output.substring(0, 10).toLowerCase(),
+                        );
+                    }
+                } catch (e) { }
             }
 
             return null;
@@ -118,7 +124,7 @@ export const CallTraceTreeItem = (props: CallTraceTreeItemProps) => {
             fragmentInputs = parsedFunctionFragment.inputs;
             functionParams = <>0x{node.input.substring(10)}</>;
             try {
-                parsedInput = AbiCoder.defaultAbiCoder().decode(fragmentInputs, getBytes(node.input).slice(4));
+                parsedInput = AbiCoder.defaultAbiCoder().decode(fragmentInputs, getBytes(node.input && node.input.length > 0 ? node.input : '0x').slice(4));
                 parsedInput.forEach((v) => v.toString());
             } catch (err) {
                 parsedInput = null;
@@ -146,7 +152,7 @@ export const CallTraceTreeItem = (props: CallTraceTreeItemProps) => {
             if (parsedErrorFragment) {
                 fragmentOutputs = parsedErrorFragment.inputs;
                 try {
-                    parsedOutput = AbiCoder.defaultAbiCoder().decode(fragmentOutputs, getBytes(node.output).slice(4));
+                    parsedOutput = AbiCoder.defaultAbiCoder().decode(fragmentOutputs, getBytes(node.output && node.output.length > 0 ? node.output : '0x').slice(4));
                     parsedOutput.forEach((v) => v.toString());
                 } catch (err) {
                     parsedOutput = null;
@@ -157,7 +163,7 @@ export const CallTraceTreeItem = (props: CallTraceTreeItemProps) => {
                     try {
                         parsedOutput = AbiCoder.defaultAbiCoder().decode(
                             fragmentOutputs,
-                            getBytes(node.output).slice(4),
+                            getBytes(node.output && node.output.length > 0 ? node.output : '0x').slice(4),
                         );
                         parsedOutput.forEach((v) => v.toString());
                     } catch (err) {
@@ -166,7 +172,7 @@ export const CallTraceTreeItem = (props: CallTraceTreeItemProps) => {
                 } else {
                     fragmentOutputs = [ParamType.from('string message')];
                     try {
-                        parsedOutput = AbiCoder.defaultAbiCoder().decode(fragmentOutputs, getBytes(node.output));
+                        parsedOutput = AbiCoder.defaultAbiCoder().decode(fragmentOutputs, getBytes(node.output && node.output.length > 0 ? node.output : '0x'));
                         parsedOutput.forEach((v) => v.toString());
                     } catch (err) {
                         parsedOutput = null;

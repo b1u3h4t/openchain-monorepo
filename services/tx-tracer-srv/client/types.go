@@ -6,6 +6,7 @@ type AddressInfo struct {
 	Functions map[string]interface{} `json:"functions"`
 	Events    map[string]interface{} `json:"events"`
 	Errors    map[string]interface{} `json:"errors"`
+	Fragments []interface{}          `json:"fragments"`
 }
 
 // TraceEntryCall 对应前端的 TraceEntryCall 类型

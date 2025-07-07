@@ -187,14 +187,17 @@ const computeBalanceChanges = (
                     const [parentNode] = findAffectedContract(traceMetadata, traceLog);
 
                     try {
-                        const parsedEvent = traceMetadata.abis[node.to][node.codehash].parseLog({
-                            topics: traceLog.topics,
-                            data: traceLog.data,
-                        });
+                        const abiObj = traceMetadata.abis[node.to]?.[node.codehash];
+                        if (abiObj) {
+                            const parsedEvent = abiObj.parseLog({
+                                topics: traceLog.topics,
+                                data: traceLog.data,
+                            });
 
-                        const value = parsedEvent.args[2] as bigint;
-                        addChange(parsedEvent.args[0] as string, parentNode.to, -value);
-                        addChange(parsedEvent.args[1] as string, parentNode.to, value);
+                            const value = parsedEvent.args[2] as bigint;
+                            addChange(parsedEvent.args[0] as string, parentNode.to, -value);
+                            addChange(parsedEvent.args[1] as string, parentNode.to, value);
+                        }
                     } catch (e) {
                         console.error('failed to process value change', e);
                     }
@@ -324,25 +327,25 @@ export const ValueChange = (props: ValueChangeProps) => {
                     .sort(
                         sortOptions[0] === 'address'
                             ? (a, b) => {
-                                  return sortOptions[1] === 'asc' ? a[0].localeCompare(b[0]) : b[0].localeCompare(a[0]);
-                              }
+                                return sortOptions[1] === 'asc' ? a[0].localeCompare(b[0]) : b[0].localeCompare(a[0]);
+                            }
                             : (a, b) => {
-                                  if (!a[1].hasMissingPrices && !b[1].hasMissingPrices) {
-                                      return sortOptions[1] === 'asc'
-                                          ? a[1].totalValueChange < b[1].totalValueChange
-                                              ? -1
-                                              : 1
-                                          : b[1].totalValueChange < a[1].totalValueChange
-                                          ? -1
-                                          : 1;
-                                  } else if (a[1].hasMissingPrices) {
-                                      return sortOptions[1] === 'asc' ? -1 : 1;
-                                  } else if (b[1].hasMissingPrices) {
-                                      return sortOptions[1] === 'asc' ? 1 : -1;
-                                  } else {
-                                      return 0;
-                                  }
-                              },
+                                if (!a[1].hasMissingPrices && !b[1].hasMissingPrices) {
+                                    return sortOptions[1] === 'asc'
+                                        ? a[1].totalValueChange < b[1].totalValueChange
+                                            ? -1
+                                            : 1
+                                        : b[1].totalValueChange < a[1].totalValueChange
+                                            ? -1
+                                            : 1;
+                                } else if (a[1].hasMissingPrices) {
+                                    return sortOptions[1] === 'asc' ? -1 : 1;
+                                } else if (b[1].hasMissingPrices) {
+                                    return sortOptions[1] === 'asc' ? 1 : -1;
+                                } else {
+                                    return 0;
+                                }
+                            },
                     )
                     .map((entry) => {
                         return <Row key={entry[0]} address={entry[0]} changes={entry[1]} />;

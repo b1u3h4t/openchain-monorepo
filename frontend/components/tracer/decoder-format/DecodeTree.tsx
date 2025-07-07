@@ -57,7 +57,7 @@ export const DecodeTree = (props: DecodeTreeProps) => {
                         address: getAddress(affected.to),
                         blockHash: '',
                         blockNumber: 0,
-                        data: logNode.data,
+                        data: logNode.data && logNode.data.length > 0 ? logNode.data : '0x',
                         logIndex: logNode.path,
                         removed: false,
                         topics: logNode.topics,
@@ -80,8 +80,15 @@ export const DecodeTree = (props: DecodeTreeProps) => {
         };
 
         const remap = (node: TraceEntryCall, parentAbi?: Interface): DecoderInputTraceExt => {
+            const abiObj = props.traceMetadata.abis[node.to]?.[node.codehash];
+            let fragments: any[] = [];
+
+            if (abiObj && Array.isArray(abiObj.fragments)) {
+                fragments = abiObj.fragments;
+            }
+
             let thisAbi = new Interface([
-                ...props.traceMetadata.abis[node.to][node.codehash].fragments,
+                ...fragments,
                 ...(parentAbi?.fragments || []),
             ]);
 
@@ -102,12 +109,12 @@ export const DecodeTree = (props: DecodeTreeProps) => {
                 from: ethers.getAddress(node.from),
                 to: ethers.getAddress(node.to),
                 value: node.value,
-                calldata: getBytes(node.input),
+                calldata: node.input && node.input.length > 0 ? getBytes(node.input) : new Uint8Array(),
 
                 failed: node.status !== 1,
                 logs: logs,
 
-                returndata: getBytes(node.output),
+                returndata: node.output && node.output.length > 0 ? getBytes(node.output) : new Uint8Array(),
                 children: children,
 
                 childOrder: node.children

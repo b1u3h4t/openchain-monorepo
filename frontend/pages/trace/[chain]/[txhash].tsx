@@ -77,9 +77,10 @@ export default function TransactionViewer() {
         const estimator = new GasPriceEstimator(provider);
         setEstimator(estimator);
 
-        provider.getBlockNumber().catch(() => {});
+        provider.getBlockNumber().catch(() => { });
 
         const tryFetchTrace = () => {
+            console.log('Attempting to fetch trace for:', chain, txhash);
             doApiRequest<TraceResponse>(`/api/v1/trace/${chain}/${txhash}`)
                 .then((traceResponse) => {
                     console.log('loaded trace', traceResponse);
@@ -88,7 +89,7 @@ export default function TransactionViewer() {
                     let customLabels: Record<string, Record<string, string>> = {};
                     try {
                         customLabels = JSON.parse(localStorage.getItem('pref:labels') || '{}');
-                    } catch {}
+                    } catch { }
                     if (!(chain in customLabels)) {
                         customLabels[chain] = {};
                     }
@@ -156,6 +157,7 @@ export default function TransactionViewer() {
                     Object.keys(labels).forEach((addr) => delete customLabels[chain][addr]);
                     localStorage.setItem('pref:labels', JSON.stringify(customLabels));
 
+                    console.log('Setting trace result:', traceResponse);
                     setTraceResult(traceResponse);
                     setTraceMetadata(metadata);
                     setLabelMetadata({
@@ -169,11 +171,11 @@ export default function TransactionViewer() {
                     });
                 })
                 .catch((e) => {
+                    console.log('failed to fetch trace', e);
                     setTraceResponse({
                         ok: false,
                         error: e,
                     });
-                    console.log('failed to fetch trace', e);
                 });
         };
 
@@ -239,7 +241,7 @@ export default function TransactionViewer() {
                                 },
                             );
                         })
-                        .catch(() => {});
+                        .catch(() => { });
                 }
 
                 tryFetchTrace();
@@ -346,7 +348,7 @@ export default function TransactionViewer() {
     }
 
     let content;
-    if (!transactionMetadata) {
+    if (!transactionMetadata && !traceResult) {
         content = (
             <>
                 <Typography variant={'h6'}>Loading transaction...</Typography>
@@ -406,6 +408,24 @@ export default function TransactionViewer() {
                         >
                             {traceTree}
                         </Box>
+                    </>
+                ) : null}
+
+                {!transactionMetadata && traceResult ? (
+                    <>
+                        <Typography variant={'h6'}>Trace Data Available</Typography>
+                        <Typography variant={'body2'}>
+                            Transaction metadata is still loading, but trace data is available.
+                        </Typography>
+                    </>
+                ) : null}
+
+                {traceResponse && !traceResponse.ok ? (
+                    <>
+                        <Typography variant={'h6'}>Trace Error</Typography>
+                        <Typography variant={'body2'} color="error">
+                            Failed to load trace: {traceResponse.error.toString()}
+                        </Typography>
                     </>
                 ) : null}
             </>
