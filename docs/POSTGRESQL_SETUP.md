@@ -73,7 +73,7 @@ createdb -O ethereum ethereum
 
 ```bash
 # 编辑 pg_hba.conf
-sudo nano /etc/postgresql/14/main/pg_hba.conf
+sudo nano /etc/postgresql/16/main/pg_hba.conf
 ```
 
 添加以下行（允许本地连接）：
@@ -236,7 +236,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ethereum;
 编辑 `postgresql.conf`：
 
 ```bash
-sudo nano /etc/postgresql/14/main/postgresql.conf
+sudo nano /etc/postgresql/16/main/postgresql.conf
 ```
 
 添加以下配置：
@@ -295,11 +295,11 @@ psql -h localhost -U ethereum -d ethereum -c "SELECT count(*) FROM pg_stat_activ
 
 # 查看表大小
 psql -h localhost -U ethereum -d ethereum -c "
-SELECT 
+SELECT
     schemaname,
     tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
-FROM pg_tables 
+FROM pg_tables
 WHERE schemaname = 'public'
 ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 "
@@ -320,6 +320,7 @@ sudo find /var/log/postgresql -name "*.log" -mtime +30 -delete
 #### 12.1 常见问题
 
 **问题**: 连接被拒绝
+
 ```bash
 # 检查服务状态
 sudo systemctl status postgresql
@@ -329,6 +330,7 @@ sudo netstat -tlnp | grep 5432
 ```
 
 **问题**: 权限错误
+
 ```sql
 -- 重新授予权限
 GRANT ALL PRIVILEGES ON DATABASE ethereum TO ethereum;
@@ -336,6 +338,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ethereum;
 ```
 
 **问题**: 内存不足
+
 ```bash
 # 调整系统内存
 echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
@@ -346,7 +349,7 @@ sudo sysctl -p
 
 ```bash
 # 查看 PostgreSQL 日志
-sudo tail -f /var/log/postgresql/postgresql-14-main.log
+sudo tail -f /var/log/postgresql/postgresql-16-main.log
 
 # 查看系统日志
 sudo journalctl -u postgresql -f
@@ -382,7 +385,7 @@ ssl_key_file = '/etc/ssl/private/server.key'
 #### 14.1 使用 psql 测试
 
 ```bash
-psql -h localhost -U ethereum -d ethereum -c "SELECT 'Database connection successful!' as status;"
+psql -h localhost -U ethereum -d ethereum -c "SELECT 'Database connection successful' as status;"
 ```
 
 #### 14.2 使用应用程序测试
@@ -396,7 +399,7 @@ curl -X GET "http://localhost:8083/api/v1/health" | jq
 
 通过以上步骤，我们成功搭建了一个完整的 PostgreSQL 数据库环境，包括：
 
-- ✅ PostgreSQL 14 安装和配置
+- ✅ PostgreSQL 16 安装和配置
 - ✅ 数据库用户和数据库创建
 - ✅ 表结构和索引创建
 - ✅ 权限管理和安全配置
@@ -405,9 +408,10 @@ curl -X GET "http://localhost:8083/api/v1/health" | jq
 - ✅ 故障排除指南
 
 数据库现在可以支持 OpenChain 项目的所有微服务，包括：
+
 - signature-database-srv
-- vyper-compiler-srv  
+- vyper-compiler-srv
 - solidity-compiler-srv
 - tx-tracer-srv
 
-所有服务都可以通过配置的环境变量连接到数据库，实现数据的持久化存储。 
+所有服务都可以通过配置的环境变量连接到数据库，实现数据的持久化存储。
